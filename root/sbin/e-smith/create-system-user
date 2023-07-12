@@ -1,0 +1,84 @@
+#! /usr/bin/perl -w
+
+#----------------------------------------------------------------------
+# Copyright 1999-2003 Mitel Networks Corporation
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#----------------------------------------------------------------------
+
+use strict;
+
+sub usage
+{
+    my $msg = shift;
+    warn("$msg\n") if $msg;
+    die("Usage: $0: user userid descr home_dir shell\n");
+}
+
+my $user = shift || usage("Must give username param");
+my $uid = shift || usage("Must give userid param");
+my $user_desc = shift || usage("Must give user desc param");
+my $home = shift || usage("Must give home param");
+my $shell = shift || usage("Must give shell param");
+
+use User::pwent;
+use User::grent;
+
+if (my $pw = getpwnam($user))
+{
+    my $euid = $pw->uid;
+    exit 0 if $euid == $uid; # Do not create user if it already exists with correct uid
+    warn ("Users $user exists but has uid of $euid - should be $uid\n");
+    exit 0;
+}
+
+if (my $pw = getpwuid($uid))       
+{
+    my $name = $pw->name;
+    warn "User id of $uid is already taken by user $name\n";
+    warn "Falling back to a system chosen uid\n";
+    # We can now go ahead and create the user and group leaving the system to choose uid/gid
+    die ("Failed to create user $user\n") if
+          system("/usr/sbin/useradd",
+		     "-r",
+		     "-d", $home,
+		     "-M",
+		     "-s", $shell,
+		     "-c", $user_desc,
+		     $user);
+    exit (0);
+}
+
+if (my $pw = getgrgid($uid))       
+{
+    my $name = $pw->name;
+    warn "Group id of $uid is already taken by user $name\n";
+    # We can now go ahead and create the user but the gid will be chosen by the system
+    die ("Failed to create user $user\n") if
+          system("/usr/sbin/useradd",
+		     "-u", $uid,
+		     "-d", $home,
+		     "-M",
+		     "-s", $shell,
+		     "-c", $user_desc,
+		     $user);
+}
+else
+{
+# We can now go ahead and create the user and group
+    die ("Failed to create group $uid\n") if
+          system("/usr/sbin/groupadd",
+	     	"-g", $uid,
+	     	$user);
+
+    die ("Failed to create user $user\n") if
+          system("/usr/sbin/useradd",
+	     	"-u", $uid,
+              "-g", $uid,
+	     	"-d", $home,
+	     	"-M",
+	     	"-s", $shell,
+	     	"-c", $user_desc,
+	     	$user);
+}
+exit 0;

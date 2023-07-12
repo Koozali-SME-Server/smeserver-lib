@@ -1,0 +1,344 @@
+#!/usr/bin/perl -w
+
+#----------------------------------------------------------------------
+# Copyright 1999-2003 Mitel Networks Corporation
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#----------------------------------------------------------------------
+
+package esmith;
+
+use strict;
+use esmith::config;
+use esmith::db;
+
+#--------------------------------------------------------------------------
+# Set up the command list and usage strings
+
+my %commands = (
+	'keys'
+	    =>	{
+		    'function'	=>	\&DB_keys,
+		    'usage'	=>	"$0 dbfile keys",
+		},
+
+	'print'
+	    =>	{
+		    'function'	=>	\&DB_print,
+		    'usage'	=>	"$0 dbfile print [key]",
+		},
+
+	'show'
+	    =>	{
+		    'function'	=>	\&DB_show,
+		    'usage'	=>	"$0 dbfile show [key]",
+		},
+
+	'get'
+	    =>	{
+		    'function'	=>	\&DB_get,
+		    'usage'	=>	"$0 dbfile get key",
+		},
+
+	'set'
+	    =>	{
+		    'function'	=>	\&DB_set,
+		    'usage'	=>	"$0 dbfile set key type "
+		    			. "[prop1 val1] [prop2 val2] ...",
+		},
+
+	'setdefault'
+	    =>	{
+		    'function'	=>	\&DB_set_default,
+		    'usage'	=>	"$0 dbfile setdefault key type "
+		    			. "[prop1 val1] [prop2 val2] ...",
+		},
+
+	'delete'
+	    =>	{
+		    'function'	=>	\&DB_delete,
+		    'usage'	=>	"$0 dbfile delete key",
+		},
+
+	'printtype'
+	    =>	{
+		    'function'	=>	\&DB_printtype,
+		    'usage'	=>	"$0 dbfile printtype [key]",
+		},
+
+	'gettype'
+	    =>	{
+		    'function'	=>	\&DB_gettype,
+		    'usage'	=>	"$0 dbfile gettype key",
+		},
+
+	'settype'
+	    =>	{
+		    'function'	=>	\&DB_settype,
+		    'usage'	=>	"$0 dbfile settype key type",
+		},
+
+	'printprop'
+	    =>	{
+		    'function'	=>	\&DB_printprop,
+		    'usage'	=>	"$0 dbfile printprop key [prop1] "
+					. "[prop2] [prop3] ...",
+		},
+
+	'getprop'
+	    =>	{
+		    'function'	=>	\&DB_getprop,
+		    'usage'	=>	"$0 dbfile getprop key prop",
+		},
+
+	'setprop'
+	    =>	{
+		    'function'	=>	\&DB_setprop,
+		    'usage'	=>	"$0 dbfile setprop key "
+					. "prop1 val1 [prop2 val2] "
+					. "[prop3 val3] ...",
+		},
+
+	'delprop'
+	    =>	{
+		    'function'	=>	\&DB_delprop,
+		    'usage'	=>	"$0 dbfile delprop key prop1 "
+					. "[prop2] [prop3] ...",
+		},
+
+    );
+
+#--------------------------------------------------------------------------
+# Set up general usage message.
+
+my $usage = "usage:
+    $commands{'keys'}{'usage'}
+    $commands{'print'}{'usage'}
+    $commands{'show'}{'usage'}
+    $commands{'get'}{'usage'}
+    $commands{'set'}{'usage'}
+    $commands{'setdefault'}{'usage'}
+    $commands{'delete'}{'usage'}
+    $commands{'printtype'}{'usage'}
+    $commands{'gettype'}{'usage'}
+    $commands{'settype'}{'usage'}
+    $commands{'printprop'}{'usage'}
+    $commands{'getprop'}{'usage'}
+    $commands{'setprop'}{'usage'}
+    $commands{'delprop'}{'usage'}
+";
+
+#--------------------------------------------------------------------------
+# Prepend $ENV{'DBPATH'} to dbfile if defined otherwise let the library
+# deal with it.
+
+my $dbfile = shift;
+die $usage unless $dbfile;
+
+my $dbpath = $ENV{'DBPATH'};
+$dbfile = "$dbpath/$dbfile" if defined $dbpath;
+
+#--------------------------------------------------------------------------
+# Tie the databasefile to a hash
+
+my $db = esmith::db->open($dbfile);
+
+#--------------------------------------------------------------------------
+# Run the appropriate command
+
+my $command = shift;
+die $usage unless $command;
+die $usage unless exists $commands{$command};
+$commands{$command}{'function'}->(@ARGV);
+
+exit 0;
+
+#--------------------------------------------------------------------------
+
+sub DB_print
+{
+    my $key = shift;
+
+    if (defined $key)
+    {
+	$db->print($key) ? exit 0 : exit 1;
+    }
+    else
+    {
+	$db->print() ? exit 0 : exit 1;
+    }
+}
+
+sub DB_keys
+{
+    my @keys = $db->get();
+
+    exit 1 unless (scalar @keys);
+    print join("\n", @keys), "\n";
+}
+
+sub DB_show
+{
+    my $key = shift;
+
+    if (defined $key)
+    {
+	$db->show($key) ? exit 0 : exit 1;
+    }
+    else
+    {
+	$db->show() ? exit 0 : exit 1;
+    }
+}
+
+sub DB_get
+{
+    my $key = shift;
+    die "$commands{'get'}{'usage'}\n" unless $key;
+
+    my $value = $db->get($key);
+    exit 1 unless defined $value;
+    print "$value\n" if defined $value;
+}
+
+sub DB_set
+{
+    my $key = shift;
+    die "$commands{'set'}{'usage'}\n" unless $key;
+    die "$commands{'set'}{'usage'}\n" unless scalar @_;
+
+    my $type = shift;
+    die "$commands{'set'}{'usage'}\n" unless defined $type;
+    die "$commands{'set'}{'usage'}\n" if scalar @_ % 2;
+
+    $db->set($key, $type) or exit 1;
+
+    &DB_setprop($key, @_) if scalar @_;
+}
+
+sub DB_set_default
+{
+    my $key = shift;
+    die "$commands{'setdefault'}{'usage'}\n" unless $key;
+    die "$commands{'setdefault'}{'usage'}\n" unless scalar @_;
+
+    my $type = shift;
+    die "$commands{'setdefault'}{'usage'}\n" unless $type;
+    die "$commands{'setdefault'}{'usage'}\n" if scalar @_ % 2;
+
+    # Only set values if the key does not exist
+
+    exit 0 if defined $db->get($key);
+
+    &DB_set($key, $type, @_);
+}
+
+sub DB_delete
+{
+    my $key = shift;
+    die "$commands{'delete'}{'usage'}\n" unless $key;
+
+    $db->delete($key) ? exit 0 : exit 1;
+}
+
+sub DB_printtype
+{
+    my $key = shift;
+
+    if (defined $key)
+    {
+	$db->print_type($key) ? exit 0 : exit 1;
+    }
+    else
+    {
+	$db->print_type() ? exit 0 : exit 1;
+    }
+}
+
+sub DB_gettype
+{
+    my $key = shift;
+    die "$commands{'get'}{'usage'}\n" unless $key;
+
+    my $value = $db->get_type($key);
+    exit 1 unless defined $value;
+    print "$value\n" if defined $value;
+}
+
+sub DB_settype
+{
+    my $key = shift;
+    die "$commands{'settype'}{'usage'}\n" unless $key;
+    my $type = shift;
+    die "$commands{'settype'}{'usage'}\n" unless $type;
+
+    $db->set_type($key, $type) ? exit 0 : exit 1;
+}
+
+sub DB_printprop
+{
+    my $key = shift;
+    die "$commands{'printprop'}{'usage'}\n" unless $key;
+
+    my @props = @_;
+
+    if (scalar @props)
+    {
+	foreach (@props)
+	{
+	    $db->print_prop($key, $_)
+		if defined $db->get_prop($key, $_);
+	}
+    }
+    else
+    {
+	$db->print_prop($key)  ? exit 0 : exit 1;
+    }
+}
+
+sub DB_getprop
+{
+    my $key = shift;
+    die "$commands{'getprop'}{'usage'}\n" unless $key;
+
+    my $prop = shift;
+    die "$commands{'getprop'}{'usage'}\n" unless scalar $prop;
+
+    my $val = $db->get_prop($key, $prop);
+
+    if (defined $val)
+    {
+	print "$val\n";
+    }
+    else
+    {
+	exit 1;
+    }
+}
+
+sub DB_setprop
+{
+    my $key = shift;
+    die "$commands{'setprop'}{'usage'}\n" unless $key;
+    die "$commands{'setprop'}{'usage'}\n" unless scalar @_;
+    die "$commands{'setprop'}{'usage'}\n" if scalar @_ % 2;
+
+    my %properties = @_;
+
+    foreach (sort keys %properties)
+    {
+	$db->set_prop($key, $_, $properties{$_});
+    }
+}
+
+sub DB_delprop
+{
+    my $key = shift;
+    die "$commands{'delprop'}{'usage'}\n" unless $key;
+    die "$commands{'delprop'}{'usage'}\n" unless scalar @_;
+
+    foreach (@_)
+    {
+	$db->delete_prop($key, $_);
+    }
+}

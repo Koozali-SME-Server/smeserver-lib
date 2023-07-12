@@ -1,0 +1,3 @@
+{
+    $DB->new_record("quux", {type=>'service', status=>'enabled'});
+}

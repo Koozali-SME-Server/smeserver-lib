@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+#----------------------------------------------------------------------
+# Copyright (c) 2001 Mitel Networks Corporation 
+# 
+# Technical support for this program is available from Mitel Networks
+# Corporation.  Please visit our web site www.e-smith.com for details.
+#----------------------------------------------------------------------
+
+sub panel_link
+{
+    my ($function, $panel) = @_;
+
+	unlink "root/etc/e-smith/web/panels/$panel/cgi-bin/$function";
+	symlink("../../../functions/$function",
+		"root/etc/e-smith/web/panels/$panel/cgi-bin/$function")
+	or die "Can't symlink to root/etc/e-smith/web/panels/$panel".
+		"/cgi-bin/$function: $!";
+}
+
+sub event_link
+{
+    my ($action, $event, $level) = @_;
+
+    unlink "root/etc/e-smith/events/${event}/S${level}${action}";
+    symlink("../actions/${action}",
+	"root/etc/e-smith/events/${event}/S${level}${action}")
+    or die "Can't symlink to " .
+	"root/etc/e-smith/events/${event}/S${level}${action}: $!";
+}
+
+#--------------------------------------------------
+# actions for events
+#--------------------------------------------------
+
+foreach my $event (qw(post-install post-upgrade bootstrap-console-save console-save))
+{
+    event_link("initialize-default-databases", $event, "00");
+}

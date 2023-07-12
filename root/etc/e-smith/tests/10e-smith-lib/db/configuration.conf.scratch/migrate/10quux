@@ -1,0 +1,4 @@
+{
+    $DB = esmith::ConfigDB->open("${DB_FILENAME}");
+}
+

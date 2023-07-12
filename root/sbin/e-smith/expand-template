@@ -1,0 +1,46 @@
+#!/usr/bin/perl -w
+
+#----------------------------------------------------------------------
+# Copyright 1999-2004 Mitel Networks Corporation
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#----------------------------------------------------------------------
+
+package esmith;
+
+use strict;
+use Errno;
+use Getopt::Long;
+use esmith::templates;
+
+my %options = ();
+
+GetOptions(\%options, 'output_filename=s', 'expand_queue=s');
+
+$options{'template_path'} = $ARGV[0] || die "Usage: $0 /path/to/file/to/expand\n";
+
+$options{'output_filename'} = $options{'template_path'}
+    unless ( exists $options{'output_filename'} );
+
+
+my %args = ( 
+		TEMPLATE_PATH   => $options{'template_path'},
+		OUTPUT_FILENAME => $options{'output_filename'},
+	    );
+
+$args{TEMPLATE_EXPAND_QUEUE} = [$options{'expand_queue'}] 
+  if exists $options{expand_queue};
+
+if ( -f $options{'output_filename'} )
+{
+    # If the target file exists, preserve its ownership and mode
+    use File::stat;
+
+    my $f = stat($options{'output_filename'} );
+    $args{UID}   = $f->uid;
+    $args{GID}   = $f->gid;
+    $args{PERMS} = $f->mode;
+}
+
+esmith::templates::processTemplate(\%args);
+

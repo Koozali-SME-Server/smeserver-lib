@@ -1,0 +1,9 @@
+{ '$DB ok' if defined $DB && $DB->isa('esmith::ConfigDB') }
+{ my $ok = 1;
+  foreach my $rec ($DB->get_all) {
+    my $key = $rec->key;
+    my $type = $rec->props <= 1 ? "SCALAR" : "HASH";
+    $ok = 0 unless *{$key}{$type};
+  }
+  'default vars ok' if $ok;
+}
