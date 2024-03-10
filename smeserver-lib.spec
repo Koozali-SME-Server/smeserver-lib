@@ -2,11 +2,11 @@
 
 %define copykooz 2013-2021
 
-Summary: e-smith server and gateway - library module
-%define name e-smith-lib
+Summary: smeserver server and gateway - library module
+%define name smeserver-lib
 Name: %{name}
 %define version 2.6.0
-%define release 17
+%define release 18
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -28,10 +28,14 @@ Requires: perl(Net::IPv4Addr) >= 0.10
 Requires: perl(Taint::Util)
 Requires: pciutils
 
+Provides: e-smith-lib
 %description
-e-smith server and gateway software - library module.
+smeserver server and gateway software - library module.
 
 %changelog
+* Mon Mar 11 2024 rename-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 2.6.0-18.sme
+- Rename to smeserver-lib [SME: 12359]
+
 * Wed Jul 12 2023 cvs2git.sh aka Brian Read <brianr@koozali.org> 2.6.0-17.sme
 - Roll up patches and move to git repo [SME: 12338]
 - Remove create e-smith-lib-update event [SME: 12338]

@@ -1,12 +1,13 @@
-# <img src="https://www.koozali.org/images/koozali/Logo/Png/Koozali_logo_2016.png" width="25%" vertical="auto" style="vertical-align:bottom"> e-smith-lib
+# <img src="https://www.koozali.org/images/koozali/Logo/Png/Koozali_logo_2016.png" width="25%" vertical="auto" style="vertical-align:bottom"> smeserver-lib
 
-SMEServer Koozali developed git repo for e-smith-lib smeserver
+SMEServer Koozali developed git repo for smeserver-lib smeserver
 
 ## Wiki
 <br />https://wiki.koozali.org/
 
 ## Bugzilla
-Show list of outstanding bugs: [here](https://bugs.koozali.org/buglist.cgi?component=e-smith-lib&product=SME%20Server%2010.X&query_format=advanced&limit=0&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=CONFIRMED)
+Show list of outstanding bugs: [here](https://bugs.koozali.org/buglist.cgi?component=smeserver-lib&product=SME%20Server%2010.X&query_format=advanced&limit=0&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=CONFIRMED)\
+And a list of outstanding Legacy bugs: (e-smith-lib) [here](https://bugs.koozali.org/buglist.cgi?component=e-smith-lib&product=SME%20Server%2010.X&query_format=advanced&limit=0&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=CONFIRMED)
 
 ## Description
 
