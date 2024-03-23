@@ -5,8 +5,8 @@
 Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
-%define version 2.6.0
-%define release 18
+%define version 11.0.0
+%define release 1
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -33,6 +33,9 @@ Provides: e-smith-lib
 smeserver server and gateway software - library module.
 
 %changelog
+* Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-1.sme
+- Update Release and Version to base version and 1st release for SME11 [SME: 12518]
+
 * Mon Mar 11 2024 rename-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 2.6.0-18.sme
 - Rename to smeserver-lib [SME: 12359]
 
