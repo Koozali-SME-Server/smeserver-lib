@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 1
+%define release 2
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -15,7 +15,7 @@ Source: %{name}-%{version}.tar.xz
 
 BuildRoot: /var/tmp/%{name}-%{version}-%{release}-buildroot
 BuildArchitectures: noarch
-BuildRequires: e-smith-devtools >= 1.6.3-01
+BuildRequires: smeserver-devtools >= 1.6.3-01
 Obsoletes: %{name}-Tai64n
 Obsoletes: whiptail
 Requires(pre): e-smith
@@ -33,6 +33,9 @@ Provides: e-smith-lib
 smeserver server and gateway software - library module.
 
 %changelog
+* Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-2.sme
+- Change Requires: e-smith- to Requires:smeserver-
+
 * Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-1.sme
 - Update Release and Version to base version and 1st release for SME11 [SME: 12518]
 
