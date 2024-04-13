@@ -23,7 +23,7 @@ esmith::console - A class to provide a backend library to the server console.
 =head1 DESCRIPTION
 
 This class provides a backend library of methods for the frontend console on
-the server. The intent is that all of the whiptail code is hidden in this
+the server. The intent is that all of the dialog code is hidden in this
 library, and the frontend can just concern itself with the logical progression
 through any and all applicable screens.
 
@@ -104,7 +104,7 @@ sub new
 
 =head2 screen and dialog
 
-These method are wrappers around whiptail and dialog, and permit the creation
+These method are wrappers around dialog, and permit the creation
 of custom screens depending on the arguments passed. They are typically not
 called directly, but are used by all of the other page methods that
 follow. You should only call these method directly if none of the other
@@ -120,11 +120,6 @@ sub screen
 sub dialog
 {
     _screen(shift, "/usr/bin/dialog", @_);
-}
-
-sub whiptail
-{
-    _screen(shift, "/usr/bin/whiptail", @_);
 }
 
 sub _screen
@@ -159,28 +154,13 @@ sub _screen
         close READER
             or die gettext("Couldn't close reading end of pipe") , ": $!\n";
 
-        if ($whiptail =~ m{\bwhiptail$} ) {
-            # whiptail sends its output via STDERR.  We temporarily
-            # shut off warnings so they don't interfere with that.
-            local $^W = 0;
+        use Fcntl qw/F_SETFD/;
 
-            open  STDERR, ">& WRITER"
-                or die gettext("Couldn't connect STDERR to pipe"), ": $!\n";
+        # Clear close-on-exec on WRITER so that it stays open for dialog to use
+        fcntl(WRITER, F_SETFD, 0);
 
-            close WRITER
-                or die gettext("Couldn't close writing end of pipe"), ": $!\n";
-
-            unshift @whiptailArgs, $whiptail,
-                '--backtitle', $self->backtitle;
-        } else {
-            use Fcntl qw/F_SETFD/;
-
-            # Clear close-on-exec on WRITER so that it stays open for dialog to use
-            fcntl(WRITER, F_SETFD, 0);
-
-            unshift @whiptailArgs, $whiptail,
+        unshift @whiptailArgs, $whiptail,
                 '--backtitle', $self->backtitle, "--output-fd", fileno(WRITER);
-        }
         exec @whiptailArgs;
         die gettext("Couldn't exec:"), ": $!\n";
     }
