@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 4
+%define release 5
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -33,6 +33,9 @@ Provides: e-smith-lib
 smeserver server and gateway software - library module.
 
 %changelog
+* Wed Apr 17 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-5.sme
+- move event e-smith-lib-update to smeserver-lib-update
+
 * Sat Apr 13 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-4.sme
 - remove whiptail [SME: 8275]
 
