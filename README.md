@@ -6,7 +6,14 @@ SMEServer Koozali developed git repo for smeserver-lib smeserver
 <br />https://wiki.koozali.org/
 
 ## Bugzilla
-Show list of outstanding bugs: [here](https://bugs.koozali.org/buglist.cgi?quicksearch=smeserver-lib)
+Show list of outstanding bugs:
+[All](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=NEEDINFO&bug_status=IN_PROGRESS&bug_status=RESOLVED&bug_status=VERIFIED&cf_package=smeserver-lib&classification=SME+Server&list_id=105756&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[Confirmed](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=CONFIRMED&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[Unconfirmed](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=UNCONFIRMED&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[Need info](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=NEEDINFO&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[In progress](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=IN_PROGRESS&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[Resolved](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=RESOLVED&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)  
+[Verified](https://bugs.koozali.org/buglist.cgi?action=wrap&bug_status=VERIFIED&cf_package=smeserver-lib&classification=SME+Server&order=changeddate+DESC%2Ccomponent%2Cpriority%2Cbug_severity&query_format=advanced)
 And a list of outstanding Legacy bugs: (e-smith-lib) [here](https://bugs.koozali.org/buglist.cgi?component=e-smith-lib&product=SME%20Server%2010.X&query_format=advanced&limit=0&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=CONFIRMED)
 
 ## Description
