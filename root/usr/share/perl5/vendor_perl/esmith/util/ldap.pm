@@ -160,11 +160,11 @@ sub ldapaddgroup {
    );
   if ($type eq "group") {
     $attrs{'description'} = $self->stringToASCII($acct->prop('Description') || $acctName );
-    $attrs{'mail'} = $acct->prop("$acctName\@$domain");
+    $attrs{'mail'} = "$acctName\@$domain";
   } 
   if ($type eq "ibay") {
     $attrs{'description'} = $self->stringToASCII($acct->prop('Name') || $acctName );
-    #$attrs{'mail'} = $acct->prop("$acctName\@$domain");# we might want to set email for ibay there?
+    #$attrs{'mail'} = "$acctName\@$domain";# we might want to set email for ibay there?
     $attrs{'objectClass'} = ['posixGroup'];
   }
   if ($type eq "machine") {
@@ -205,11 +205,11 @@ sub ldapmodgroup {
    );
   if ($type eq "group") {
     $attrs{'description'} = [ $self->stringToASCII($acct->prop('Description') || $acctName )  ];
-    $attrs{'mail'} = [ $acct->prop("$acctName\@$domain") ];
+    $attrs{'mail'} = [ "$acctName\@$domain" ];
   }
   if ($type eq "ibay") {
     $attrs{'description'} = [ $self->stringToASCII($acct->prop('Name') || $acctName ) ] ;
-    #$attrs{'mail'} = [ $acct->prop("$acctName\@$domain") ];
+    #$attrs{'mail'} = [ "$acctName\@$domain" ];
   }
   # if type user we add nothing
   #get current content
