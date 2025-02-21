@@ -573,7 +573,7 @@ sub validatePassword($$)
     $strength ||= 'normal';
 
     my $length = 12;
-    my $db = esmith::ConfigDB->open("/tmp/toto") || undef;
+    my $db = esmith::ConfigDB->open() || undef;
     my $sysconfig = $db->get("passwordstrength")||  undef  if $db ;
     $length = $sysconfig->prop("length") || "12" if $sysconfig;
 
