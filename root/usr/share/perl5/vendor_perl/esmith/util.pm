@@ -556,6 +556,12 @@ for example /etc/passwd, /etc/samba/smbpasswd, etc.
 =head2 validatePassword($password, $strength)
 
 Validate Unix password.
+length is the minimal password length, default is 12.
+strength could be none,normal,intermediate or strong.
+- none: only check for length
+- normal: upper and lower case letters
+- intermediate: upper and lower case letters not positive to cracklib
+- strong : numbers, letter and special characters not positive to cracklib
 
 =cut
 
@@ -566,14 +572,24 @@ sub validatePassword($$)
 
     $strength ||= 'normal';
 
+    my $length = 12;
+    my $db = esmith::ConfigDB->open("/tmp/toto") || undef;
+    my $sysconfig = $db->get("passwordstrength")||  undef  if $db ;
+    $length = $sysconfig->prop("length") || "12" if $sysconfig;
+
     my $reason = 'ok';
-    $reason = 'it is too short' unless (length($password) > 6);
+    $reason = 'it is too short' unless (length($password) >= $length);
     return $reason if ($reason ne 'ok' || $strength eq 'none');
 
-    $reason = 'it does not contain numbers' if (not $password =~ /\d/);
     $reason = 'it does not contain uppercase characters' if (not $password =~ /[A-Z]/);
     $reason = 'it does not contain lowercase characters' if (not $password =~ /[a-z]/);
-    $reason = 'it does not contain special characters' if (not $password =~ /\W|_/);
+    return $reason if ($reason ne 'ok' || $strength eq 'normal');
+
+    # we are left here with intermediate and strong
+    if ($strength eq 'strong') {
+        $reason = 'it does not contain numbers' if (not $password =~ /\d/);
+        $reason = 'it does not contain special characters' if (not $password =~ /\W|_/);
+    }
     return $reason if ($reason ne 'ok' && $strength eq 'strong');
 
     if ( -f '/usr/lib64/cracklib_dict.pwd' ) {
