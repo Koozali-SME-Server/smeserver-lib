@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 11
+%define release 12
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -33,6 +33,9 @@ Provides: e-smith-lib
 smeserver server and gateway software - library module.
 
 %changelog
+* Wed May 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-12.sme
+- prevent service handling in bootstrap and post-upgrade [SME: 13002]
+
 * Thu Feb 20 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-11.sme
 - remove pptpd reference [SME: 11417]
 - move template-begin-ini [SME: 12211]

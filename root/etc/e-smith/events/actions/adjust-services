@@ -24,6 +24,7 @@ use Errno;
 use DirHandle;
 
 my $event = shift || die "must give event name parameter";
+exit(0) if ( grep( /^$event$/, qw(post-upgrade  bootstrap-console-save) ));
 chdir "/etc/e-smith/events/$event" or die "Couldn't chdir to event directory /etc/e-smith/events/$event: $!";
 my $dh = DirHandle->new("services2adjust");
 
