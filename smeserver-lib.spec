@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 12
+%define release 13
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -33,6 +33,12 @@ Provides: e-smith-lib
 smeserver server and gateway software - library module.
 
 %changelog
+* Sun Jun 08 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-13.sme
+- add esmith::AccountsDB::UTF8 support [SME: 13029]
+  also esmith::DomainsDB::UTF8, esmith::HostsDB::UTF8, 
+  esmith::NetworksDB::UTF8
+- improve esmith::ConfigDB::UTF8 support [SME: 13028]
+
 * Wed May 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-12.sme
 - prevent service handling in bootstrap and post-upgrade [SME: 13002]
 

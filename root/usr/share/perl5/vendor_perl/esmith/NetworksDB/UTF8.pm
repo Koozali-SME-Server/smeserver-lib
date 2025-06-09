@@ -1,18 +1,17 @@
 #----------------------------------------------------------------------
-# Copyright 1999-2008 Mitel Networks Corporation
-# Copyright 2013-2025 Koozali Foundationi inc.
+# Copyright 2013-2025 Koozali Foundation inc.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #----------------------------------------------------------------------
 
-package esmith::ConfigDB::UTF8;
+package esmith::NetworksDB::UTF8;
 
 use strict;
 use warnings;
 
-use esmith::ConfigDB;
+use esmith::NetworksDB;
 use esmith::config::utf8;
-our @ISA = qw( esmith::ConfigDB );
+our @ISA = qw(esmith::NetworksDB);
 
 sub tie_class
 {
