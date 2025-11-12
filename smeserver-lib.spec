@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 14
+%define release 15
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Wed Nov 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-15.sme
+- cleanup smtp-auth-proxy  [SME: 12833]
+
 * Sat Nov 08 2025 Brian Read <brianr@koozali.org> 11.0.0-14.sme
 - Update getmyip change logged name to getmyip [SME: 12866]
 
