@@ -220,6 +220,7 @@ sub ldapmodgroup {
                                filter => "(objectClass=*)",
                                attrs   =>  [ @list ]
                              );
+  return $result->code if  ($result->code && $result->code> 0);
   my $href = $result->as_struct;
   my @arrayOfDNs  = keys %$href;
   $href = $$href{$arrayOfDNs[0]};
@@ -490,6 +491,7 @@ sub ldapmoduser {
                                filter => "(objectClass=*)",
                                attrs   =>  [ @list ]
                              );
+  return $result->code if  ($result->code && $result->code> 0);
   my $href = $result->as_struct;
   my @arrayOfDNs  = keys %$href;
   $href = $$href{$arrayOfDNs[0]};

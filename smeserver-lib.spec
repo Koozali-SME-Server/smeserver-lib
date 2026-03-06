@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 15
+%define release 16
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Fri Mar 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-16.sme
+- improve error handling for mod functions [SME: 13451]
+
 * Wed Nov 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-15.sme
 - cleanup smtp-auth-proxy  [SME: 12833]
 
