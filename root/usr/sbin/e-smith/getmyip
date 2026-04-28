@@ -26,11 +26,6 @@ services=(
 ipv4_regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
 ipv6_regex='^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^(([0-9a-fA-F]{1,4}:){1,7}:)$|^(:{2}([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})$'
 
-# Replace with your config get command as appropriate
-get_config_value() {
-	echo $(/usr/sbin/e-smith/db configuration get $1)
-}
-
 shuffle_services() {
     local i j temp
     for ((i=${#services[@]} - 1; i > 0; i--)); do
@@ -59,15 +54,6 @@ is_valid_ip() {
 }
 
 get_public_ip() {
-    # Check configured PublicIP first
-    config_ip=$(get_config_value PublicIP)
-    config_ip="${config_ip//[$'\t\r\n ']}"
-    if is_valid_ip "$config_ip"; then
-        logger -t getmyip "Using configured PublicIP: $config_ip"
-        echo "$config_ip"
-        return
-    fi
-
     shuffle_services
 
     for entry in "${services[@]}"; do

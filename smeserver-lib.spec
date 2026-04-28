@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 16
+%define release 17
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,10 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Tue Apr 28 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-17.sme
+- revert cod to override getmyip [SME: 12866]
+  should be done before calling it
+
 * Fri Mar 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-16.sme
 - improve error handling for mod functions [SME: 13451]
 
