@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+timeout_limit=2
+timeout_count=0
 
 services=(
     "plain:https://ifconfig.me/ip"
@@ -12,9 +15,9 @@ services=(
     "plain:https://wtfismyip.com/text"
     "plain:https://ifconfig.co/ip"
 
-    "dns:dig +short myip.opendns.com @resolver1.opendns.com"
-    "dns:dig +short txt ch whoami.cloudflare @1.0.0.1"
-    "dns:dig +short txt o-o.myaddr.l.google.com @ns1.google.com | awk -F'\"' '{print \$2}'"
+    "dns:opendns"
+    "dns:cloudflare"
+    "dns:google"
 
     "json:https://jsonip.com"
     "json:https://ifconfig.co/json"
@@ -23,96 +26,276 @@ services=(
     "json:https://api64.ipify.org?format=json"
 )
 
+dns_opendns=(dig +short myip.opendns.com @resolver1.opendns.com)
+dns_cloudflare=(dig +short txt ch whoami.cloudflare @1.0.0.1)
+dns_google=(dig +short txt o-o.myaddr.l.google.com @ns1.google.com)
+
 ipv4_regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
-ipv6_regex='^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^(([0-9a-fA-F]{1,4}:){1,7}:)$|^(:{2}([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})$'
 
 shuffle_services() {
-    local i j temp
-    for ((i=${#services[@]} - 1; i > 0; i--)); do
+    local i j tmp
+
+    for ((i=${#services[@]}-1; i>0; i--)); do
         j=$((RANDOM % (i + 1)))
-        temp="${services[i]}"
+
+        tmp="${services[i]}"
         services[i]="${services[j]}"
-        services[j]="$temp"
+        services[j]="$tmp"
     done
 }
 
-is_valid_ip() {
-    local ip=$1
-    if [[ $ip =~ $ipv4_regex ]]; then
-        IFS='.' read -r -a octets <<< "$ip"
-        for octet in "${octets[@]}"; do
-            if (( octet > 255 )); then
-                return 1
-            fi
-        done
-        return 0
-    elif [[ $ip =~ $ipv6_regex ]]; then
-        return 0
-    else
-        return 1
+record_timeout() {
+    ((timeout_count++))
+
+    logger -t getmyip \
+        "Timeout count: ${timeout_count}/${timeout_limit}"
+
+    if (( timeout_count >= timeout_limit )); then
+        logger -t getmyip "Too many timeouts, exiting"
+        echo "Failed: too many timeouts." >&2
+        exit 1
     fi
 }
 
+is_valid_ip() {
+    local ip="$1"
+
+    if [[ $ip =~ $ipv4_regex ]]; then
+        IFS='.' read -r -a octets <<< "$ip"
+
+        for octet in "${octets[@]}"; do
+            (( octet <= 255 )) || return 1
+        done
+
+        return 0
+    fi
+
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$ip" <<'EOF' >/dev/null 2>&1
+import ipaddress
+import sys
+
+try:
+    ipaddress.ip_address(sys.argv[1])
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+EOF
+        return $?
+    fi
+
+    return 1
+}
+
+extract_plain_ip() {
+    local ip
+
+    ip=$(echo "$1" | tr -d '\r' | head -n1 | xargs)
+
+    [[ $ip =~ \<.*\> ]] && return 1
+
+    if is_valid_ip "$ip"; then
+        printf '%s\n' "$ip"
+        return 0
+    fi
+
+    return 1
+}
+
+extract_json_ip() {
+    local data="$1"
+    local ip=""
+
+    if command -v jq >/dev/null 2>&1; then
+        ip=$(jq -r '
+            .ip //
+            .query //
+            .data //
+            .result //
+            empty
+        ' <<< "$data" | head -n1)
+    else
+        ip=$(echo "$data" |
+            grep -oE '"(ip|query)"[[:space:]]*:[[:space:]]*"[^"]+"' |
+            head -n1 |
+            sed -E 's/.*:[[:space:]]*"([^"]+)".*/\1/')
+    fi
+
+    ip=$(echo "$ip" | xargs)
+
+    if is_valid_ip "$ip"; then
+        printf '%s\n' "$ip"
+        return 0
+    fi
+
+    return 1
+}
+
+query_plain_service() {
+    local url="$1"
+    local response rc ip
+
+    response=$(timeout 12 curl \
+        -fsSL \
+        --connect-timeout 5 \
+        --max-time 10 \
+        -H "Accept: text/plain" \
+        "$url" 2>/dev/null)
+
+    rc=$?
+
+    case "$rc" in
+        0)
+            ;;
+        28|124)
+            logger -t getmyip "Timeout from $url (rc=$rc)"
+            return 2
+            ;;
+        *)
+            logger -t getmyip "Failure from $url (rc=$rc)"
+            return 1
+            ;;
+    esac
+
+    ip=$(extract_plain_ip "$response") || return 1
+
+    printf '%s\n' "$ip"
+    return 0
+}
+
+query_json_service() {
+    local url="$1"
+    local response rc ip
+
+    response=$(timeout 12 curl \
+        -fsSL \
+        --connect-timeout 5 \
+        --max-time 10 \
+        -H "Accept: application/json" \
+        "$url" 2>/dev/null)
+
+    rc=$?
+
+    case "$rc" in
+        0)
+            ;;
+        28|124)
+            logger -t getmyip "Timeout from $url (rc=$rc)"
+            return 2
+            ;;
+        *)
+            logger -t getmyip "Failure from $url (rc=$rc)"
+            return 1
+            ;;
+    esac
+
+    ip=$(extract_json_ip "$response") || return 1
+
+    printf '%s\n' "$ip"
+    return 0
+}
+
+query_dns_service() {
+    local provider="$1"
+    local response rc ip
+
+    case "$provider" in
+        opendns)
+            response=$(timeout 6 "${dns_opendns[@]}" 2>/dev/null)
+            ;;
+        cloudflare)
+            response=$(timeout 6 "${dns_cloudflare[@]}" 2>/dev/null)
+            ;;
+        google)
+            response=$(timeout 6 "${dns_google[@]}" 2>/dev/null)
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    rc=$?
+
+    case "$rc" in
+        0)
+            ;;
+        124)
+            logger -t getmyip "DNS timeout ($provider)"
+            return 2
+            ;;
+        *)
+            logger -t getmyip "DNS failure ($provider) rc=$rc"
+            return 1
+            ;;
+    esac
+
+    ip=$(echo "$response" |
+        tr -d '"' |
+        grep -oE '[0-9A-Fa-f:.]+' |
+        head -n1)
+
+    if is_valid_ip "$ip"; then
+        printf '%s\n' "$ip"
+        return 0
+    fi
+
+    return 1
+}
+
 get_public_ip() {
+    local entry type target ip rc
+
     shuffle_services
 
     for entry in "${services[@]}"; do
+
         type="${entry%%:*}"
-        service="${entry#*:}"
+        target="${entry#*:}"
 
-        if [[ "$type" == "plain" ]]; then
-            response=$(curl -s --max-time 10 -w "%{http_code}" -H "Accept: text/plain" "$service")
-            http_status="${response: -3}"
-            public_ip="${response::-3}"
-            public_ip="${public_ip//[$'\t\r\n ']}"  # Trim whitespace
+        case "$type" in
+            plain)
+                ip=$(query_plain_service "$target")
+                rc=$?
+                ;;
 
-            if [[ $public_ip =~ \<.*\> ]]; then
-                logger -t getmyip "Service $service returned HTML content, skipping: $public_ip"
+            json)
+                ip=$(query_json_service "$target")
+                rc=$?
+                ;;
+
+            dns)
+                ip=$(query_dns_service "$target")
+                rc=$?
+                ;;
+
+            *)
                 continue
-            fi
+                ;;
+        esac
 
-            if [[ "$http_status" == "200" ]] && is_valid_ip "$public_ip"; then
-                logger -t getmyip "Service used: $service, IP found: $public_ip"
-                echo "$public_ip"
-                return
-            else
-                logger -t getmyip "Service $service failed or invalid IP returned"
-            fi
+        if (( rc == 2 )); then
+            record_timeout
+            continue
+        fi
 
-        elif [[ "$type" == "json" ]]; then
-            response=$(curl -s --max-time 10 -H "Accept: application/json" "$service")
-            if command -v jq >/dev/null 2>&1; then
-                public_ip=$(echo "$response" | jq -r '.ip // .query // empty')
-            else
-                public_ip=$(echo "$response" | grep -oP '(?<="ip"\s*:\s*")[^"]+|(?<="query"\s*:\s*")[^"]+')
-            fi
-            public_ip="${public_ip//[$'\t\r\n ']}"  # Trim whitespace
+        if (( rc != 0 )); then
+            continue
+        fi
 
-            if is_valid_ip "$public_ip"; then
-                logger -t getmyip "JSON service used: $service, IP found: $public_ip"
-                echo "$public_ip"
-                return
-            else
-                logger -t getmyip "JSON service $service returned invalid IP or no IP found"
-            fi
+        if [[ -n "$ip" ]] && is_valid_ip "$ip"; then
+            logger -t getmyip \
+                "Success using $entry -> $ip"
 
-        elif [[ "$type" == "dns" ]]; then
-            fallback_ip=$(eval "$service")
-            fallback_ip="${fallback_ip//\"/}"
-            fallback_ip="${fallback_ip//[$'\t\r\n ']}"
-            if is_valid_ip "$fallback_ip"; then
-                logger -t getmyip "DNS service used: $service, IP found: $fallback_ip"
-                echo "$fallback_ip"
-                return
-            else
-                logger -t getmyip "DNS service $service failed or returned invalid IP"
-            fi
+            echo "$ip"
+            return 0
         fi
     done
 
+    logger -t getmyip \
+        "Failed to retrieve public IP using all services"
+
     echo "Failed to retrieve public IP using all services." >&2
-    logger -t getmyip "Error: Failed to retrieve public IP using all services."
-    exit 1
+    return 1
 }
 
 get_public_ip
