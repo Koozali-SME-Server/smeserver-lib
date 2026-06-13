@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 18
+%define release 19
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,7 +36,7 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
-* Fri Jun 12 2026 Brian Read <brianr@koozali.org> 11.0.0-18.sme
+* Sat Jun 13 2026 Brian Read <brianr@koozali.org> 11.0.0-19.sme
 - Make getmyip more robust and agile when no internet [SME: 13588]
 
 * Tue Apr 28 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-17.sme
