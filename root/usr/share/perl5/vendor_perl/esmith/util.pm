@@ -558,10 +558,10 @@ for example /etc/passwd, /etc/samba/smbpasswd, etc.
 Validate Unix password.
 length is the minimal password length, default is 12.
 strength could be none,normal,intermediate or strong.
-- none: only check for length
-- normal: upper and lower case letters
-- intermediate: upper and lower case letters not positive to cracklib
-- strong : numbers, letter and special characters not positive to cracklib
+- none 		The password can be anything as no checking is done other than the minimum length of characters. (default 12)
+- normal 	The password requires at least 1 upper (A-Z), 1 lower (a-z) on top of the none setting checks.
+- intermediate 	The password requires to pass a Cracklib dictionary check on top of the normal setting checks.
+- strong 	The password requires to have at least 1 digit (0-9) and 1 special character (/-?) on top of the intermediate setting checks. 
 
 =cut
 
