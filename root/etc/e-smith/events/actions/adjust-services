@@ -116,7 +116,7 @@ foreach my $service (grep { !/^\./ } $dh->read())
     if (-d "/service/$service" && glob("/etc/rc7.d/S??$service"))
     {
 	my $enabled = ($s->prop('status') || 'disabled') eq 'enabled';
-	adjust_supervised_service($service,
+		adjust_supervised_service($service,
 		# stop the service if it is now disabled
 		$enabled ? () : 'down',
 		# Send the specified signal(s) to the running daemon
@@ -131,17 +131,21 @@ foreach my $service (grep { !/^\./ } $dh->read())
     {
         my $enabled = ($s->prop('status') || 'disabled') eq 'enabled';
         # bring the service up if it is enabled (and we're not stopping it or running it once, or using signal able to start it)
-        unshift(@actions,'start') if ($enabled && !grep { /^(down|stop|d|once|o|start|restart|reload-or-restart)$/ } @actions) ;
-	# stop the service if it is disabled
-	@actions = ('stop') unless  $enabled;
-	foreach (@actions)
-	{
-	    warn "adjusting non-supervised $service ($_)\n";
-	    esmith::util::serviceControl(
-		    NAME => $service,
-		    ACTION => $_,
-		);
-	}
+        unshift(@actions,'start') if ($enabled && !grep { /^(down|stop|d|once|o|start|restart|reload-or-restart|reload)$/ } @actions) ;
+        # stop the service if it is disabled
+        @actions = ('stop') unless  $enabled;
+        # Prevent issues during gui update. 
+        # Any smanager restart will kill children and as result the update process.
+        # Hard restart of httpd-e-smith will likely timeout the browser.
+        map { $_ = 'reload-or-restart' if $_ eq 'restart' } @actions if ( $service eq "smanager" or $service eq "httpd-e-smith");
+        foreach (@actions)
+        {
+           warn "adjusting non-supervised $service ($_)\n";
+           esmith::util::serviceControl(
+           NAME => $service,
+           ACTION => $_,
+           );
+        }
     }
 }
 

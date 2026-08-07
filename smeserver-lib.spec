@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 20
+%define release 21
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Thu Aug 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-21.sme
+- replace restart with reload-or-restart for smanager/httpd-e-smith [SME: 13653]
+
 * Mon Jul 13 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-20.sme
 - update pod of validatePassword [SME: 12382]
 

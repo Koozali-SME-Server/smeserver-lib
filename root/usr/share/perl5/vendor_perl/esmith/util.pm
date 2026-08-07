@@ -1139,38 +1139,47 @@ sub serviceControl
     {
         my ($startScript) = glob("/etc/rc.d/rc7.d/S*$serviceName") ||'' ;
         my ($systemdScript) = "/usr/lib/systemd/system/$serviceName.service" ||'';
-	my ($systemdAlias) = "/etc/systemd/system/$serviceName.service" ||'';
-  	my $multiple = "$serviceName.service";
-  	($multiple = $serviceName ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $serviceName =~ /@/ );
+        my ($systemdAlias) = "/etc/systemd/system/$serviceName.service" ||'';
+        my $multiple = "$serviceName.service";
+        ($multiple = $serviceName ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $serviceName =~ /@/ );
 
-	unless ( -e $startScript or -e $systemdScript or -e "/usr/lib/systemd/system/$multiple" or -e $systemdAlias)
+        # Prevent issues during gui update. 
+        # Any smanager restart will kill children and as result the update process.
+        # Hard restart of httpd-e-smith will likely timeout the browser.
+        $serviceAction = "reload-or-restart" if ( ($serviceAction eq "restart") and  ( $serviceName eq "smanager" or $serviceName eq "httpd-e-smith"));
+
+        unless ( -e $startScript or -e $systemdScript or -e "/usr/lib/systemd/system/$multiple" or -e $systemdAlias)
         {
             warn "serviceControl: startScript not found "
               . "for service $serviceName\n";
             return 0;
         }
 
-	 if ( (-e $systemdScript  or -e "/usr/lib/systemd/system/$multiple" or -e $systemdAlias) and ! -e $startScript){
-	    # systemd is not aware of adjust, sigusr1, sigusr2, sigterm, sighup
-	    $serviceAction = ( $serviceAction =~/^(adjust|graceful|sighup|sigusr1|sigusr2)$/ ) ? "reload-or-restart" : $serviceAction; 
-           $serviceAction = ( $serviceAction eq "sigterm" ) ? "restart" : $serviceAction;
-	    if ($serviceAction =~/^(sig[A-Za-z12]+)$/) {
-		$serviceAction=uc($serviceAction);
-		system('/usr/bin/systemctl',"kill","--signal=$serviceAction","$serviceName.service") == '0'
+        if ( (-e $systemdScript  or -e "/usr/lib/systemd/system/$multiple" or -e $systemdAlias) and ! -e $startScript)
+        {
+            # systemd is not aware of adjust, sigusr1, sigusr2, sigterm, sighup
+            $serviceAction = ( $serviceAction =~/^(adjust|graceful|sighup|sigusr1|sigusr2)$/ ) ? "reload-or-restart" : $serviceAction; 
+            $serviceAction = ( $serviceAction eq "sigterm" ) ? "restart" : $serviceAction;
+            if ($serviceAction =~/^(sig[A-Za-z12]+)$/) 
+            {
+                $serviceAction=uc($serviceAction);
+                system('/usr/bin/systemctl',"kill","--signal=$serviceAction","$serviceName.service") == '0'
                 ||    warn "serviceControl: Couldn't " .
                 "system( /usr/bin/systemctl kill --signal=$serviceAction $serviceName.service): $!\n";
             }
-	    elsif ($serviceAction =~/^(start|stop|restart|reload|reload-or-restart|try-restart|reload-or-try-restart|enable -now|enable|disable)$/) {
+            elsif ($serviceAction =~/^(start|stop|restart|reload|reload-or-restart|try-restart|reload-or-try-restart|enable -now|enable|disable)$/) 
+            {
                 system('/usr/bin/systemctl',"$serviceAction","$serviceName.service") == '0'
                 ||    warn "serviceControl: Couldn't " .
                 "system( /usr/bin/systemctl $serviceAction $serviceName.service): $!\n";
             }
-            else {
+            else 
+            {
                 die "serviceControl: systemd doesn't know : systemctl $serviceAction $serviceName.service";
             }
         }
-
-        elsif (-e $startScript) {
+        elsif (-e $startScript) 
+        {
             my  $background = $params{'BACKGROUND'} || 'false';
 
             die "serviceControl: Unknown serviceAction $serviceAction" if ($serviceAction =~/^(reload-or-restart|try-restart|reload-or-try-restart|enable -now|enable|disable)$/);
