@@ -369,9 +369,10 @@ sub ldapadduser {
   # get $type, if not what we want returns 254
   my $type = $acct->prop('type') or return 254;
   my $uid =  $acct->prop('Uid') or return 253;
-  my $gid = $acct->prop('Gid') || $uid ;
-  my $first = $self->stringToASCII($acct->prop('FirstName')) || '';
-  my $last = $self->stringToASCII($acct->prop('LastName')) || '';
+  my $gid = $acct->prop('Gid') || $uid;
+  # we accept wide characters in those
+  my $first = $acct->prop('FirstName') || '';
+  my $last = $acct->prop('LastName') || '';
   my $phone = $self->stringToASCII($acct->prop('Phone')) || '';
   my $company = $self->stringToASCII($acct->prop('Company')) || '';
   my $dept = $self->stringToASCII($acct->prop('Dept')) || '';
@@ -399,7 +400,8 @@ sub ldapadduser {
      $attrs{"cn"}= "$first $last";
      $attrs{"givenName"}= "$first";
      $attrs{"sn"}= "$last";
-     $attrs{"displayName"}= "$first $last";
+     # to avoid double encoding there
+     $attrs{"displayName"}= decode('UTF-8',"$first $last");
      $attrs{"mail"}= "$acctName\@$domain";
      $attrs{"telephoneNumber"}= $phone;
      $attrs{"o"}= $company;
@@ -447,8 +449,8 @@ sub ldapmoduser {
   my $type = $acct->prop('type') or return 254;
   my $uid =  $acct->prop('Uid') or return 253;
   my $gid = $acct->prop('Gid') || $uid;
-  my $first = $self->stringToASCII($acct->prop('FirstName')) || '';
-  my $last = $self->stringToASCII($acct->prop('LastName')) || '';
+  my $first = $acct->prop('FirstName') || '';
+  my $last = $acct->prop('LastName') || '';
   my $phone = $self->stringToASCII($acct->prop('Phone')) || '';
   my $company = $self->stringToASCII($acct->prop('Company')) || '';
   my $dept = $self->stringToASCII($acct->prop('Dept')) || '';
@@ -463,6 +465,7 @@ sub ldapmoduser {
     "loginShell" => "$shell",
    );
   if ( $type eq "user") {
+    # cn does not end up with double encoding...
     $attrs{"cn"}= "$first $last";
     $attrs{"givenName"}=$first;
     $attrs{"mail"}="$acctName\@$domain";
@@ -472,13 +475,14 @@ sub ldapmoduser {
     $attrs{"ou"}=$dept;
     $attrs{"l"}=$city;
     $attrs{"street"}=$street;
-    $attrs{"displayName"}= "$first $last";
+    # seems that displayName ends with double encoding
+    $attrs{"displayName"}= decode('UTF-8',"$first $last");
   } elsif ($type eq "group")  {
     $attrs{"homeDirectory"}="/home/e-smith/";
     $attrs{"loginShell"} = "/bin/false";
     $attrs{"cn"}=$acctName;
   } elsif ($type eq "ibay")  {
-    my $Name = $self->stringToASCII($acct->prop('Name')) || $acctName; 
+    my $Name = $acct->prop('Name') || $acctName; 
     $attrs{"cn"}=$Name;
     $attrs{"homeDirectory"} = "/home/e-smith/files/ibays/$acctName";
     $attrs{"loginShell"} = "/bin/false";

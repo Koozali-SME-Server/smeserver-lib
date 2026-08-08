@@ -11,12 +11,29 @@ use warnings;
 
 use esmith::AccountsDB;
 use esmith::config::utf8;
+use esmith::DB::db;
+use utf8;
+use Encode qw(encode);
 our @ISA = qw(esmith::AccountsDB);
 
 sub tie_class
 {
     return 'esmith::config::utf8';
 }
+
+sub new_record
+{
+    my ($self, $key, $props) = @_;
+
+    if(getpwnam(encode('UTF-8', $key)) || getgrnam(encode('UTF-8',$key)))
+    {
+        warn "Attempt to create account '$key' which already exists ",
+            "in passwd";
+        return undef;
+    }
+    return $self->esmith::DB::db::new_record($key, $props);
+}
+
 
 1;
 
