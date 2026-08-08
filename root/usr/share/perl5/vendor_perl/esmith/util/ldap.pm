@@ -401,7 +401,7 @@ sub ldapadduser {
      $attrs{"givenName"}= "$first";
      $attrs{"sn"}= "$last";
      # to avoid double encoding there
-     $attrs{"displayName"}= decode('UTF-8',"$first $last");
+     $attrs{"displayName"}= "$first $last";
      $attrs{"mail"}= "$acctName\@$domain";
      $attrs{"telephoneNumber"}= $phone;
      $attrs{"o"}= $company;
@@ -476,7 +476,7 @@ sub ldapmoduser {
     $attrs{"l"}=$city;
     $attrs{"street"}=$street;
     # seems that displayName ends with double encoding
-    $attrs{"displayName"}= decode('UTF-8',"$first $last");
+    $attrs{"displayName"}= "$first $last";
   } elsif ($type eq "group")  {
     $attrs{"homeDirectory"}="/home/e-smith/";
     $attrs{"loginShell"} = "/bin/false";

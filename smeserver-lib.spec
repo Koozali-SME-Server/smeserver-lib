@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 22
+%define release 23
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,7 +36,7 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
-* Sat Aug 08 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-22.sme
+* Sat Aug 08 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-23.sme
 - fix Wide character in getpwnam [SME: 13697]
 - fix double encoding in ldap displayname vs cn
 
