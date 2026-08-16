@@ -37,7 +37,7 @@ smeserver server and gateway software - library module.
 
 %changelog
 * Sun Aug 16 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-24.sme
-- fix [SME: ]
+- force ldap street/city/company/phone/dpt if missing [SME: 13701]
 
 * Sat Aug 08 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-23.sme
 - fix Wide character in getpwnam [SME: 13697]
