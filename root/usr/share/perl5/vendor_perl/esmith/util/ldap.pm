@@ -371,13 +371,22 @@ sub ldapadduser {
   my $uid =  $acct->prop('Uid') or return 253;
   my $gid = $acct->prop('Gid') || $uid;
   # we accept wide characters in those
-  my $first = $acct->prop('FirstName') || '';
-  my $last = $acct->prop('LastName') || '';
-  my $phone = $self->stringToASCII($acct->prop('Phone')) || '';
-  my $company = $self->stringToASCII($acct->prop('Company')) || '';
-  my $dept = $self->stringToASCII($acct->prop('Dept')) || '';
-  my $city = $self->stringToASCII($acct->prop('City')) || '';
-  my $street = $acct->prop('Street') || '';
+  my $first = $acct->prop('FirstName') or return 253;
+  my $last = $acct->prop('LastName') or return 253;
+
+  my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
+  my $cldap = $c->get('ldap');
+  my $Dphone = $cldap->prop('defaultPhoneNumber') || "555-5555";
+  my $Dcompany = $cldap->prop('defaultCompany') || "XYZ Corporation";
+  my $Ddept = $cldap->prop('defaultDepartment') || "Main";
+  my $Dcity = $cldap->prop('defaultCity') || "Ottawa";
+  my $Dstreet = $cldap->prop('defaultStreet') || "123 Main Street";
+  my $phone = $self->stringToASCII($acct->prop('Phone')) || $Dphone;
+  my $company = $self->stringToASCII($acct->prop('Company')) || $Dcompany;
+  my $dept = $self->stringToASCII($acct->prop('Dept')) || $Ddept;
+  my $city = $self->stringToASCII($acct->prop('City')) || $Dcity;
+  my $street = $self->stringToASCII($acct->prop('Street')) || $Dstreet;
+
   my $shell =  $acct->prop('Shell') || '/usr/bin/false';
 
   # create the hash to submit with values common to all
@@ -449,13 +458,22 @@ sub ldapmoduser {
   my $type = $acct->prop('type') or return 254;
   my $uid =  $acct->prop('Uid') or return 253;
   my $gid = $acct->prop('Gid') || $uid;
-  my $first = $acct->prop('FirstName') || '';
-  my $last = $acct->prop('LastName') || '';
-  my $phone = $self->stringToASCII($acct->prop('Phone')) || '';
-  my $company = $self->stringToASCII($acct->prop('Company')) || '';
-  my $dept = $self->stringToASCII($acct->prop('Dept')) || '';
-  my $city = $self->stringToASCII($acct->prop('City')) || '';
-  my $street = $self->stringToASCII($acct->prop('Street')) || '';
+  my $first = $acct->prop('FirstName') or return 253;
+  my $last = $acct->prop('LastName') or return 253;
+
+  my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
+  my $cldap = $c->get('ldap');
+  my $Dphone = $cldap->prop('defaultPhoneNumber') || "555-5555";
+  my $Dcompany = $cldap->prop('defaultCompany') || "XYZ Corporation";
+  my $Ddept = $cldap->prop('defaultDepartment') || "Main";
+  my $Dcity = $cldap->prop('defaultCity') || "Ottawa";
+  my $Dstreet = $cldap->prop('defaultStreet') || "123 Main Street";
+  my $phone = $self->stringToASCII($acct->prop('Phone')) || $Dphone;
+  my $company = $self->stringToASCII($acct->prop('Company')) || $Dcompany;
+  my $dept = $self->stringToASCII($acct->prop('Dept')) || $Ddept;
+  my $city = $self->stringToASCII($acct->prop('City')) || $Dcity;
+  my $street = $self->stringToASCII($acct->prop('Street')) || $Dstreet;
+
   my $shell =  $acct->prop('Shell') || '/usr/bin/false';
   # create the hash to submit with values common to all
   my %attrs = (
