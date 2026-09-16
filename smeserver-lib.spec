@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 24
+%define release 25
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Wed Sep 16 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-25.sme
+- fix ldap group update [SME: 13741]
+
 * Sun Aug 16 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-24.sme
 - force ldap street/city/company/phone/dpt if missing [SME: 13701]
 

@@ -232,7 +232,7 @@ sub ldapmodgroup {
   return 0 unless  ( %attrs);
   #use replace for any change  
   $result = $self->modify("cn=$acctName,ou=Groups,$base",
-                      replace =>  %attrs
+                      replace => [ %attrs ]
     );
   return $result->code;
 }
@@ -371,8 +371,11 @@ sub ldapadduser {
   my $uid =  $acct->prop('Uid') or return 253;
   my $gid = $acct->prop('Gid') || $uid;
   # we accept wide characters in those
-  my $first = $acct->prop('FirstName') or return 253;
-  my $last = $acct->prop('LastName') or return 253;
+  my $first;my $last;
+  if ($type eq "user") {
+    $first = $acct->prop('FirstName') or return 253;
+    $last = $acct->prop('LastName') or return 253;
+  }
 
   my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
   my $cldap = $c->get('ldap');
@@ -419,7 +422,7 @@ sub ldapadduser {
      $attrs{"street"}= $street;
   } elsif ($type eq "group")  {
      $attrs{"objectClass"}=['account', 'posixAccount', 'shadowAccount'];
-     $attrs{"cn"}=$acctName;
+     $attrs{"cn"}=$acct->prop('Description') || $acctName;
      $attrs{"homeDirectory"} = "/home/e-smith";
      $attrs{"loginShell"} = "/bin/false";
   } elsif ($type eq "ibay")  {
@@ -458,8 +461,12 @@ sub ldapmoduser {
   my $type = $acct->prop('type') or return 254;
   my $uid =  $acct->prop('Uid') or return 253;
   my $gid = $acct->prop('Gid') || $uid;
-  my $first = $acct->prop('FirstName') or return 253;
-  my $last = $acct->prop('LastName') or return 253;
+  # this fails with Groups
+  my $first;my $last;
+  if ( $type eq "user") {
+    $first = $acct->prop('FirstName') or return "missing firstame";
+    $last = $acct->prop('LastName') or return "missing lastname";
+  }
 
   my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
   my $cldap = $c->get('ldap');
@@ -498,7 +505,7 @@ sub ldapmoduser {
   } elsif ($type eq "group")  {
     $attrs{"homeDirectory"}="/home/e-smith/";
     $attrs{"loginShell"} = "/bin/false";
-    $attrs{"cn"}=$acctName;
+    $attrs{"cn"}=$acct->prop('Description') || $acctName;
   } elsif ($type eq "ibay")  {
     my $Name = $acct->prop('Name') || $acctName; 
     $attrs{"cn"}=$Name;
