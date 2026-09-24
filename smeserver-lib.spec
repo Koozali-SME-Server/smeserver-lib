@@ -6,7 +6,7 @@ Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 25
+%define release 26
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Thu Sep 24 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-26.sme
+- fix start is needed before reload [SME: 13748]
+
 * Wed Sep 16 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-25.sme
 - fix ldap group update [SME: 13741]
 
@@ -84,7 +87,7 @@ smeserver server and gateway software - library module.
 - more password granularity (none,normal,intermediate,strong) [SME: 12384]
 
 * Thu Dec 12 2024 Brian Read <brianr@koozali.org> 11.0.0-9.sme
-- add in getmyip [SME: 12810 ]
+- add in getmyip [SME: 12810]
 
 * Tue Nov 12 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-8.sme
 - fix Use of uninitialized value [SME: 12760]
