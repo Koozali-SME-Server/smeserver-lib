@@ -1,12 +1,12 @@
 # $Id: e-smith-lib.spec,v 1.20 2023/07/11 02:49:10 trevorb Exp $
 
-%define copykooz 2013-2021
+%define copykooz 2013-2026
 
 Summary: smeserver server and gateway - library module
 %define name smeserver-lib
 Name: %{name}
 %define version 11.0.0
-%define release 26
+%define release 27
 Version: %{version}
 Release: %{release}%{?dist}
 License: Artistic
@@ -36,6 +36,9 @@ AutoReqProv: yes
 smeserver server and gateway software - library module.
 
 %changelog
+* Mon Sep 28 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-27.sme
+- update copyright year [SME: 13756]
+
 * Thu Sep 24 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-26.sme
 - fix start is needed before reload [SME: 13748]
 
