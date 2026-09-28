@@ -1,6 +1,12 @@
 # $Id: e-smith-lib.spec,v 1.20 2023/07/11 02:49:10 trevorb Exp $
 
-%define copykooz 2013-2026
+%define build_year %(date +%%Y)
+%if %{build_year} < 2026
+%define current_year 2026
+%else
+%define current_year %{build_year}
+%endif
+%define copykooz 2013-%{current_year}
 
 Summary: smeserver server and gateway - library module
 %define name smeserver-lib
